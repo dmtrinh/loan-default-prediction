@@ -20,8 +20,16 @@ We will employ many phases of [CRISP-DM](https://en.wikipedia.org/wiki/Cross-ind
 ## Data Preprocessing
 This is a high dimensional dataset with 142 features.
 
-A breakdown of loans by statuses:
+The target variable is `loan_status`.  A breakdown of loans by statuses:
 ![Loan Status Distribution](./output/loan_status_distribution.png)
+
+For this effort, we primarily care about data that would help us make a prediction on whether a loan will be fully paid or not.  Using [LendingClub's definition for each loan status](./data/What%20Do%20the%20Different%20Note%20Statuses%20Mean.pdf), we decided to map the target variable down to two classes:
+* `Fully Paid`
+* `Non-Performing`:  include all `Late (31-120 days)`, `Default`, and `Charged Off` loans 
+
+By categorizing `Late (31-120 days)` and `Default` loans the same as `Charged Off`, we are taking a conservative approach to further minimize risk for investors.
+
+Loans in other statuses are dropped since their outcome has not been determined.
 
 After reviewing [LendingClub's companion data dictionary](./data/LCDataDictionary.xlsx), the following features were pruned:
 * Features where data would only be available after the loan has been funded.  Obviously, these would not be useful since our goal is to help determine whether or not the loan should be funded in the first place.
@@ -64,59 +72,58 @@ Earliest non-Null value for [ term ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ verification_status ]: 			2007-06-01 00:00:00
 ```
 
-We felt the addition of `avg_cur_bal` was important so we chose a cut-off date of `2012-08-01`.  All records with `issue_d` prior to this date were pruned.  Fortunately, only 3.4% of the records (or 62936) were pruned, leaving us still with over 1.8M records.
+We felt the addition of `avg_cur_bal` was important so we chose a cut-off date of `2012-08-01`.  All records with `issue_d` prior to this date were pruned.  Fortunately, only 3.4% of the records (or 62936) were pruned, leaving us still with over 1.81M records.
 
 At this point, our remaining missing values were:
 
 ```
-addr_state                       0
 annual_inc                       0
 application_type                 0
-avg_cur_bal                   4638
-bc_util                      21424
+avg_cur_bal                   4642
+bc_util                      21481
 chargeoff_within_12_mths         0
 delinq_2yrs                      0
-dti                           1128
-emp_length                  116254
-emp_title                   128954
+dti                           1138
+emp_length                       0
+emp_title                   130266
 fico_range_high                  0
 fico_range_low                   0
 grade                            0
 home_ownership                   0
-il_util                     927337
-inq_fi                      783772
-inq_last_12m                783773
+il_util                     928539
+inq_fi                      783870
+inq_last_12m                783871
 inq_last_6mths                   1
 installment                      0
 int_rate                         0
 issue_d                          0
 loan_amnt                        0
 loan_status                      0
-mths_since_last_delinq      908778
+mths_since_last_delinq      912350
 purpose                          0
 revol_bal                        0
-revol_util                    1340
+revol_util                    1344
 sub_grade                        0
 term                             0
 verification_status              0
 ```
 
 A few features had less than 2% missing values:  `avg_cur_bal`, `bc_util`, `dti`, `inq_last_6mths`, and `revol_util`.  We proceeded to drop records where 
-there were missing values in one or more of these features.  For this pass, 27049 records (< 1.5% of records) were dropped.
+there were missing values in one or more of these features.  For this pass, 27115 records (< 1.5% of records) were dropped.
 
 Features `il_util`, `inq_fi`, `inq_last_12m`, and `mths_since_last_delinq` had over 40% missing values; these columns were dropped.
 
-**Our cleaned dataset ended with 26 features and 1.78M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
+**Our cleaned dataset ended with 26 features and ~1.79M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
 
 ## Exploratory Data Analysis
 
 By plotting a word cloud of `emp_title`, we can easily see the most popular professions of those taking out loans.
 ![Most popular professions](./output/wordcloud_emp_title.png)
 
-Since the Top 20 job titles make up over 14% of the total loan population, we will use them as a representative sample to identify some trends.
+Since the Top 20 job titles make up ~14.7% of the total loan population, we will use them as a representative sample to identify some trends.
 ![Top20 Professions vs Loan Status](./output/emp_title_top20_vs_loan_status.png)
 
-The mean ratio of Non-Performing to Fully Paid loans is ~26.7%.  As hinted by our sample, job titles _may_ be a predictor variable; some job titles (e.g. Drivers) will have substantially high non-performing ratios.
+The mean ratio of Non-Performing to Fully Paid loans is ~27.2%.  As hinted by our sample, job titles _may_ be a predictor variable; some job titles (e.g. Drivers) will have substantially higher non-performing ratios.
 ![Top20 Professions Loan Ratios](./output/emp_title_top20_ratio.png)
 
 Generally, the median annual income for borrowers who fully repay their loans is higher than those who default.
