@@ -30,7 +30,7 @@ After reviewing [LendingClub's companion data dictionary](./data/LCDataDictionar
 * Features with high percentage of missing values:
 ![Features with high % of missing values](./output/table_features_with_over_40_pct_missing_values_.png)
 
-After this initial pass, we are left with 32 features, some still with missing values.  Further examination of each feature by `issue_d`, we see that the earliest non-NULL value varies.  This indicates that features were added over time to the dataset.
+After this initial pass, we are left with 32 features, some still with missing values.  Further examination of each feature by `issue_d`, we see variations in the earliest non-NULL value.  This indicates that some features were added over time to the dataset.
 ```
 Earliest non-Null value for [ addr_state ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ annual_inc ]: 			2007-06-01 00:00:00
@@ -53,8 +53,6 @@ Earliest non-Null value for [ inq_last_6mths ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ installment ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ int_rate ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ issue_d ]: 			2007-06-01 00:00:00
-Earliest non-Null value for [ last_fico_range_high ]: 			2007-06-01 00:00:00
-Earliest non-Null value for [ last_fico_range_low ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ loan_amnt ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ loan_status ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ mths_since_last_delinq ]: 			2007-06-01 00:00:00
@@ -92,8 +90,6 @@ inq_last_6mths                   1
 installment                      0
 int_rate                         0
 issue_d                          0
-last_fico_range_high             0
-last_fico_range_low              0
 loan_amnt                        0
 loan_status                      0
 mths_since_last_delinq      908778
@@ -110,7 +106,7 @@ there were missing values in one or more of these features.  For this pass, 2704
 
 Features `il_util`, `inq_fi`, `inq_last_12m`, and `mths_since_last_delinq` had over 40% missing values; these columns were dropped.
 
-**Our cleaned dataset ended with 28 features and 1.78M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
+**Our cleaned dataset ended with 26 features and 1.78M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
 
 ## Exploratory Data Analysis
 
