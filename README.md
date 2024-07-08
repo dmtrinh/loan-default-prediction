@@ -11,24 +11,108 @@ The goal of this project is to evaluate several ML classification models to dete
 Optimizing loan portfolio performance is a fundamental use case for banks and lenders.  Classification models play an important role by helping to predict default risk for a borrower -- enabling lenders to minimize loan losses through better decisions on loan funding.
 
 ## Data Sources
-The dataset contains over 2.8 million loan records on the LendingClub platform spanning 2007 through Q3 2020.  It is available for download from [Kaggle](https://www.kaggle.com/datasets/ethon0426/lending-club-20072020q1)
+The LendingClub dataset contained over 2.8 million loan records spanning the period 2007 through Q3 2020.  It is available for download from [Kaggle](https://www.kaggle.com/datasets/ethon0426/lending-club-20072020q1).
 
 ## Methodology
 
 We will employ many phases of [CRISP-DM](https://en.wikipedia.org/wiki/Cross-industry_standard_process_for_data_mining) in this project to explore, clean, and prepare the data for modeling.
 
-## Data Preprocessing and Exploratory Data Analysis
-The LendingClub dataset is high dimensional with 142 features.
-
-After reviewing [LendingClub's companion data dictionary](./data/LCDataDictionary.xlsx), the following features were pruned:
-* Features with high percentage of missing values:
-![Features with high % of missing values](./output/table_features_with_over_40_pct_missing_values_.png)
-* Features where data would only be available after the loan has been funded.  Obviously, these would not be useful since our goal is to help determine whether or not the loan should be funded in the first place.
-* Features where data was not captured prior to `2012-08-01`
-* `id`, `member_id`, and `url`.  These are useful as indices, but not useful for our model.
-* `desc`.  This information is formally categorized in loan `purpose` by LendingClub.
-
+## Data Preprocessing
+This is a high dimensional dataset with 142 features.
 
 A breakdown of loans by statuses:
 ![Loan Status Distribution](./output/loan_status_distribution.png)
+
+After reviewing [LendingClub's companion data dictionary](./data/LCDataDictionary.xlsx), the following features were pruned:
+* Features where data would only be available after the loan has been funded.  Obviously, these would not be useful since our goal is to help determine whether or not the loan should be funded in the first place.
+* `id`, `member_id`, and `url`.  These are useful as indices, but not useful for our model.
+* `desc`; this is the loan description provided by the borrower.  This information is formally categorized by LendingClub in another feature called `purpose`.
+* Features with high percentage of missing values:
+![Features with high % of missing values](./output/table_features_with_over_40_pct_missing_values_.png)
+
+After this initial pass, we are left with 32 features, some still with missing values.  Further examination of each feature by `issue_d`, we see that the earliest non-NULL value varies.  This indicates that features were added over time to the dataset.
+```
+Earliest non-Null value for [ addr_state ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ annual_inc ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ application_type ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ avg_cur_bal ]: 			2012-08-01 00:00:00
+Earliest non-Null value for [ bc_util ]: 			2012-03-01 00:00:00
+Earliest non-Null value for [ chargeoff_within_12_mths ]: 			2007-08-01 00:00:00
+Earliest non-Null value for [ delinq_2yrs ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ dti ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ emp_length ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ emp_title ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ fico_range_high ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ fico_range_low ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ grade ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ home_ownership ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ il_util ]: 			2015-12-01 00:00:00
+Earliest non-Null value for [ inq_fi ]: 			2015-12-01 00:00:00
+Earliest non-Null value for [ inq_last_12m ]: 			2015-12-01 00:00:00
+Earliest non-Null value for [ inq_last_6mths ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ installment ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ int_rate ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ issue_d ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ last_fico_range_high ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ last_fico_range_low ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ loan_amnt ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ loan_status ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ mths_since_last_delinq ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ purpose ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ revol_bal ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ revol_util ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ sub_grade ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ term ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ verification_status ]: 			2007-06-01 00:00:00
+```
+
+We felt the addition of `avg_cur_bal` was important so we chose a cut-off date of `2012-08-01`.  All records with `issue_d` prior to this date were pruned.  Fortunately, only 3.4% of the records (or 62936) were pruned, leaving us still with over 1.8M records.
+
+At this point, our remaining missing values were:
+
+```
+addr_state                       0
+annual_inc                       0
+application_type                 0
+avg_cur_bal                   4638
+bc_util                      21424
+chargeoff_within_12_mths         0
+delinq_2yrs                      0
+dti                           1128
+emp_length                  116254
+emp_title                   128954
+fico_range_high                  0
+fico_range_low                   0
+grade                            0
+home_ownership                   0
+il_util                     927337
+inq_fi                      783772
+inq_last_12m                783773
+inq_last_6mths                   1
+installment                      0
+int_rate                         0
+issue_d                          0
+last_fico_range_high             0
+last_fico_range_low              0
+loan_amnt                        0
+loan_status                      0
+mths_since_last_delinq      908778
+purpose                          0
+revol_bal                        0
+revol_util                    1340
+sub_grade                        0
+term                             0
+verification_status              0
+```
+
+A few features had less than 2% missing values:  `avg_cur_bal`, `bc_util`, `dti`, `inq_last_6mths`, and `revol_util`.  We proceeded to drop records where 
+there were missing values in one or more of these features.  For this pass, 27049 records (< 1.5% of records) were dropped.
+
+Features 'il_util', 'inq_fi', 'inq_last_12m', and 'mths_since_last_delinq' had over 40% missing values; these columns were dropped.
+
+**Our cleaned dataset had 28 features and 1.78M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
+
+## Exploratory Data Analysis
+
+
 
