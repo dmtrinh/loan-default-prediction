@@ -108,11 +108,29 @@ verification_status              0
 A few features had less than 2% missing values:  `avg_cur_bal`, `bc_util`, `dti`, `inq_last_6mths`, and `revol_util`.  We proceeded to drop records where 
 there were missing values in one or more of these features.  For this pass, 27049 records (< 1.5% of records) were dropped.
 
-Features 'il_util', 'inq_fi', 'inq_last_12m', and 'mths_since_last_delinq' had over 40% missing values; these columns were dropped.
+Features `il_util`, `inq_fi`, `inq_last_12m`, and `mths_since_last_delinq` had over 40% missing values; these columns were dropped.
 
-**Our cleaned dataset had 28 features and 1.78M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
+**Our cleaned dataset ended with 28 features and 1.78M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
 
 ## Exploratory Data Analysis
 
+By plotting a word cloud of `emp_title`, we can easily see the most popular professions of those taking out loans.
+![Most popular professions](./output/wordcloud_emp_title.png)
 
+Since the Top 20 job titles make up over 14% of the total loan population, we will use them as a representative sample to identify some trends.
+![Top20 Professions vs Loan Status](./output/emp_title_top20_vs_loan_status.png)
 
+The mean ratio of Non-Performing to Fully Paid loans is ~26.7%.  As hinted by our sample, job titles _may_ be a predictor variable; some job titles (e.g. Drivers) will have substantially high non-performing ratios.
+![Top20 Professions Loan Ratios](./output/emp_title_top20_ratio.png)
+
+Generally, the median annual income for borrowers who fully repay their loans is higher than those who default.
+![Top20 Professions Annual Incoming](./output/emp_title_top20_vs_annual_inc2.png)
+
+Conversely, the median loan amount for borrowers who fully repay their loan is lower than those who default. 
+![Top20 Professions Loan Amount](./output/emp_title_top20_vs_loan_amnt.png)
+
+### Plotting predictor variables against loan_status
+![Predictor variables vs loan_status](./output/eda.png)
+
+### Correlation matrix
+![Correlation matrix](./output/correlation_matrix.png)
