@@ -36,16 +36,16 @@ After reviewing [LendingClub's companion data dictionary](./data/LCDataDictionar
 * `id`, `member_id`, and `url`.  These are useful as indices, but not useful for our model.
 * `desc`; this is the loan description provided by the borrower.  This information is formally categorized by LendingClub in another feature called `purpose`.
 * Features with high percentage of missing values:
-![Features with high % of missing values](./output/table_features_with_over_40_pct_missing_values_.png)
+![Features with high % of missing values](./output/table_features_with_over_40_pct_missing_values.png)
 
 After this initial pass, we are left with 32 features, some still with missing values.  Further examination of each feature by `issue_d`, we see variations in the earliest non-NULL value.  This indicates that some features were added over time to the dataset.
 ```
+Earliest non-Null value for [ acc_now_delinq ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ addr_state ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ annual_inc ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ application_type ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ avg_cur_bal ]: 			2012-08-01 00:00:00
 Earliest non-Null value for [ bc_util ]: 			2012-03-01 00:00:00
-Earliest non-Null value for [ chargeoff_within_12_mths ]: 			2007-08-01 00:00:00
 Earliest non-Null value for [ delinq_2yrs ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ dti ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ emp_length ]: 			2007-06-01 00:00:00
@@ -64,6 +64,8 @@ Earliest non-Null value for [ issue_d ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ loan_amnt ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ loan_status ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ mths_since_last_delinq ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ pub_rec ]: 			2007-06-01 00:00:00
+Earliest non-Null value for [ pub_rec_bankruptcies ]: 			2007-08-01 00:00:00
 Earliest non-Null value for [ purpose ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ revol_bal ]: 			2007-06-01 00:00:00
 Earliest non-Null value for [ revol_util ]: 			2007-06-01 00:00:00
@@ -77,35 +79,38 @@ We felt the addition of `avg_cur_bal` was important so we chose a cut-off date o
 At this point, our remaining missing values were:
 
 ```
-annual_inc                       0
-application_type                 0
-avg_cur_bal                   4642
-bc_util                      21481
-chargeoff_within_12_mths         0
-delinq_2yrs                      0
-dti                           1138
-emp_length                       0
-emp_title                   130266
-fico_range_high                  0
-fico_range_low                   0
-grade                            0
-home_ownership                   0
-il_util                     928539
-inq_fi                      783870
-inq_last_12m                783871
-inq_last_6mths                   1
-installment                      0
-int_rate                         0
-issue_d                          0
-loan_amnt                        0
-loan_status                      0
-mths_since_last_delinq      912350
-purpose                          0
-revol_bal                        0
-revol_util                    1344
-sub_grade                        0
-term                             0
-verification_status              0
+acc_now_delinq                 0
+addr_state                     0
+annual_inc                     0
+application_type               0
+avg_cur_bal                 4642
+bc_util                    21481
+delinq_2yrs                    0
+dti                         1138
+emp_length                     0
+emp_title                 130266
+fico_range_high                0
+fico_range_low                 0
+grade                          0
+home_ownership                 0
+il_util                   928539
+inq_fi                    783870
+inq_last_12m              783871
+inq_last_6mths                 1
+installment                    0
+int_rate                       0
+issue_d                        0
+loan_amnt                      0
+loan_status                    0
+mths_since_last_delinq    912350
+pub_rec                        0
+pub_rec_bankruptcies           0
+purpose                        0
+revol_bal                      0
+revol_util                  1344
+sub_grade                      0
+term                           0
+verification_status            0
 ```
 
 A few features had less than 2% missing values:  `avg_cur_bal`, `bc_util`, `dti`, `inq_last_6mths`, and `revol_util`.  We proceeded to drop records where 
@@ -113,14 +118,40 @@ there were missing values in one or more of these features.  For this pass, 2711
 
 Features `il_util`, `inq_fi`, `inq_last_12m`, and `mths_since_last_delinq` had over 40% missing values; these columns were dropped.
 
-**Our cleaned dataset ended with 26 features and ~1.79M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
+**Our cleaned dataset ended with 28 features and ~1.79M records.**  [[statistical report]](https://html-preview.github.io/?url=https://github.com/dmtrinh/loan-default-prediction/blob/main/output/data_profile_report_after_cleaning.html)
+
+Here's the loan distribution after cleaning:
+![Loan distribution after cleaning](./output/new_loan_status_distribution.png)
 
 ## Exploratory Data Analysis
+
+Each state's percentage of total loan volume approximately track with its percentage population of the United States.
+![Total loan volume by State](./output/total_loan_vol_by_state.png)
+
+The vast majority of loans were used for debt consolidation and credit cards.
+![Total loan volume by Purpose](./output/total_loan_amnt_by_purpose.png)
+
+### Loan Grade
+
+LendingClub assigns a grade to each loan based on risk levels.  Grade `A` loans are the safest, but yielding the lowest returns.  Notice grade `G` loans have an average interest rate of over 28% which is almost the same as credit cards.
+![Total loan volume by Grade](./output/total_loan_vol_by_grade.png)
+
+![Average int rate by Grade](./output/avg_int_rate_by_grade.png)
+
+### FICO Scores
+
+The vast majority of loan volume comes from borrowers with less than 725 FICO scores.  This is somewhat expected.  While 725 is an "acceptable" score [[source](https://www.experian.com/blogs/ask-experian/credit-education/score-basics/725-credit-score/)], these borrowers likely did not qualify for prime lending rates with more traditional lenders - especially for unsecured loans.  Which is where LendingClub comes in.
+![Total loan volume by FICO](./output/total_loan_vol_by_fico.png)
+
+Much interestingly, however, is only 10 points separate borrowers who fully paid back their loans vs those who didn't.
+![Average FICO by loan status](./output/avg_fico_by_loan_status.png)
+
+### Top 20 Job Titles
 
 By plotting a word cloud of `emp_title`, we can easily see the most popular professions of those taking out loans.
 ![Most popular professions](./output/wordcloud_emp_title.png)
 
-Since the Top 20 job titles make up ~14.7% of the total loan population, we will use them as a representative sample to identify some trends.
+Since the Top 20 job titles make up > 15% of the total loan population, we will use them as a representative sample to identify some trends.
 ![Top20 Professions vs Loan Status](./output/emp_title_top20_vs_loan_status.png)
 
 The mean ratio of Non-Performing to Fully Paid loans is ~27.2%.  As hinted by our sample, job titles _may_ be a predictor variable; some job titles (e.g. Drivers) will have substantially higher non-performing ratios.

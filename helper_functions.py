@@ -104,6 +104,46 @@ def create_wordcloud(input: pd.Series, max_words: int = 1000):
     plt.savefig('./output/wordcloud_' + input.name + '.png', dpi=300, bbox_inches='tight')
     plt.show()
 
+def plot_Atotals_vs_B(df, A, B, rotation=0):
+    """
+    Function to plot the total of one feature against another feature
+
+    Input:
+        df: pandas DataFrame
+        feature1: name of the first feature
+        feature2: name of the second feature
+    """
+
+    # Total A by B
+    total_A = df.groupby(B)[A].sum().sort_values(ascending=False)
+
+    # Plot total A by B
+    plt.figure(figsize=(18, 6))
+    ax = sns.barplot(x=B, y=A, hue=B, data=pd.DataFrame(total_A), palette='viridis')
+
+    # Add space to left most bar
+    #plt.xlim(-1, 7)
+
+    # Add more margin between each bar
+    plt.subplots_adjust(wspace=.75)
+
+    # Add labels to each bar, format y-axis in millions
+    #for container in ax.containers:
+    #    ax.bar_label(container, fmt='${:,.2f}')
+
+    plt.title(f'Total {A} Volume by {B}')
+    # Set y-label
+    plt.ylabel(f'Total {A} Volume ($)')
+
+    # Set x-tick rotation
+    plt.xticks(rotation=rotation)
+
+    # Show y-axis in plain format (without scientific notation)
+    plt.ticklabel_format(style='plain', axis='y')
+    plt.savefig(f'./output/total_{A}_by_{B}.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    
+
 def plot_dataframe_as_table_image(df, table_name, index_title):
     """
     Function to plot a dataframe as an image
@@ -119,5 +159,5 @@ def plot_dataframe_as_table_image(df, table_name, index_title):
         width=800
     )
 
-    fig.write_image('./output/table_' + table_name + '_.png', scale=2)
+    fig.write_image('./output/table_' + table_name + '.png', scale=2)
     fig.show()
