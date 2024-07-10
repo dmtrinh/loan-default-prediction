@@ -1,11 +1,11 @@
 # Default prediction to optimize loan portfolio performance
 
 ## Introduction
-LendingClub is an early peer-to-peer lending network for borrowers seeking loans between $1,000 to $40,000.  These loans are funded by investors who are looking for higher-than-normal returns on their capital.  Since these loans are unsecured, investors need to perform their own due diligence to minimize loss of original investment and maximize returns.
+LendingClub is an early peer-to-peer lending network for borrowers seeking loans between $1,000 to $40,000.  These loans are funded by investors who are looking for higher-than-normal returns on their capital.  Since these loans are unsecured, investors are expected to perform additional due diligence to minimize loss of original investment and maximize returns.
 
 To help investors in the decisioning process, LendingClub makes available many borrower and loan-specific information.  Borrower information include demographic and economic details such as location, employment, income, credit scores, and more.  In addition, information on interest rate, term duration, and purpose are provided for each loan.
 
-The goal of this project is to evaluate several ML classification models to determine their effectiveness in predicting whether a LendingClub loan will be fully paid.  Investors can use these predictions to optimize their capital allocations for maximum profit.
+The goal of this project is to evaluate several ML classification models to determine their effectiveness in predicting whether a LendingClub loan will be fully paid.  Investors can use these models to optimize their capital allocations for maximum profit.
 
 ## Rationale
 Optimizing loan portfolio performance is a fundamental use case for banks and lenders.  Classification models play an important role by helping to predict default risk for a borrower -- enabling lenders to minimize loan losses through better decisions on loan funding.
@@ -23,7 +23,7 @@ This is a high dimensional dataset with 142 features.
 The target variable is `loan_status`.  A breakdown of loans by statuses:
 ![Loan Status Distribution](./output/loan_status_distribution.png)
 
-For this effort, we primarily care about data that would help us make a prediction on whether a loan will be fully paid or not.  Using [LendingClub's definition for each loan status](./data/What%20Do%20the%20Different%20Note%20Statuses%20Mean.pdf), we decided to map the target variable down to two classes:
+For this effort, we primarily care about data that would help us make a prediction on whether a loan will be fully repaid or not.  Using [LendingClub's definition for each loan status](./data/What%20Do%20the%20Different%20Note%20Statuses%20Mean.pdf), we decided to map the target variable down to two classes:
 * `Fully Paid`
 * `Non-Performing`:  include all `Late (31-120 days)`, `Default`, and `Charged Off` loans 
 
@@ -125,7 +125,7 @@ Here's the loan distribution after cleaning:
 
 ## Exploratory Data Analysis
 
-Each state's percentage of total loan volume approximately track with its percentage population of the United States.
+Each state's percentage of total loan volume approximately track with its percentage of U.S. population.
 ![Total loan volume by State](./output/total_loan_vol_by_state.png)
 
 The vast majority of loans were used for debt consolidation and credit cards.
@@ -133,17 +133,17 @@ The vast majority of loans were used for debt consolidation and credit cards.
 
 ### Loan Grade
 
-LendingClub assigns a grade to each loan based on risk levels.  Grade `A` loans are the safest, but yielding the lowest returns.  Notice grade `G` loans have an average interest rate of over 28% which is almost the same as credit cards.
+LendingClub assigns a grade to each loan based on risk levels.  Grade `A` loans are the safest, but yielding the lowest returns.  Being the riskiest, grade `G` loans have an average interest rate of over 28% which is almost the same as credit cards!
 ![Total loan volume by Grade](./output/total_loan_vol_by_grade.png)
 
 ![Average int rate by Grade](./output/avg_int_rate_by_grade.png)
 
 ### FICO Scores
 
-The vast majority of loan volume comes from borrowers with less than 725 FICO scores.  This is somewhat expected.  While 725 is an "acceptable" score [[source](https://www.experian.com/blogs/ask-experian/credit-education/score-basics/725-credit-score/)], these borrowers likely did not qualify for prime lending rates with more traditional lenders - especially for unsecured loans.  Which is where LendingClub comes in.
+The vast majority of loan volume comes from borrowers with less than 725 FICO scores.  This is somewhat expected.  While 725 is an "acceptable" score [[source](https://www.experian.com/blogs/ask-experian/credit-education/score-basics/725-credit-score/)], these borrowers likely did not qualify for prime lending rates with more traditional lenders - especially for unsecured loans.  Hence, this is where LendingClub comes in.
 ![Total loan volume by FICO](./output/total_loan_vol_by_fico.png)
 
-Much interestingly, however, is only 10 points separate borrowers who fully paid back their loans vs those who didn't.
+More interestingly, however, is only 10 points separate borrowers who fully paid back their loans vs those who didn't.
 ![Average FICO by loan status](./output/avg_fico_by_loan_status.png)
 
 ### Top 20 Job Titles
@@ -154,7 +154,7 @@ By plotting a word cloud of `emp_title`, we can easily see the most popular prof
 Since the Top 20 job titles make up > 15% of the total loan population, we will use them as a representative sample to identify some trends.
 ![Top20 Professions vs Loan Status](./output/emp_title_top20_vs_loan_status.png)
 
-The mean ratio of Non-Performing to Fully Paid loans is ~27.2%.  As hinted by our sample, job titles _may_ be a predictor variable; some job titles (e.g. Drivers) will have substantially higher non-performing ratios.
+The mean ratio of Non-Performing to Fully Paid loans is ~26%.  As hinted by our sample, job titles _may_ be a predictor variable; some job titles (e.g. Drivers) will have substantially higher non-performing ratios.
 ![Top20 Professions Loan Ratios](./output/emp_title_top20_ratio.png)
 
 Generally, the median annual income for borrowers who fully repay their loans is higher than those who default.
