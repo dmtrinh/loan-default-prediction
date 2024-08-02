@@ -17,8 +17,8 @@ def print_loan_status_percentage(df, column_name):
             print(df[df[column_name] == i]['loan_status'].value_counts(normalize=True))
             print('----')
 
-# Function to create a correlation matrix
-def plot_corr(df, size=10):
+# Function to create and plot a correlation matrix
+def plot_correlation_heatmap(df, size=10):
     """
     Function plots a graphical correlation matrix for each pair of columns in the dataframe.
 
@@ -34,13 +34,153 @@ def plot_corr(df, size=10):
 
     corr = df.corr()
     fig, ax = plt.subplots(figsize=(size, size))
-    cax = ax.matshow(corr, cmap='coolwarm')
-    fig.colorbar(cax)
+
+    #cax = ax.matshow(corr, cmap='coolwarm')
+    #fig.colorbar(cax)
+
+    sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f')
+    plt.savefig('./output/correlation_heatmap.png', dpi=300, bbox_inches='tight')
+
     plt.xticks(range(len(corr.columns)), corr.columns, rotation=90)
     plt.yticks(range(len(corr.columns)), corr.columns)
     plt.savefig('./output/correlation_matrix.png', dpi=300, bbox_inches='tight')
     plt.show()
+
+
+def plot_feature_importance(importance, names, model_name):
+    """
+    Function to plot the feature importance for a given model
+
+    Input:
+        importance: array of feature importances
+        names: array of feature names
+        model_type: name of the model
+    """
+
+    feature_importance = np.array(importance)
+    feature_names = np.array(names)
+
+    data={'feature_names':feature_names,'feature_importance':feature_importance}
+    fi_df = pd.DataFrame(data)
+
+    # Sort the dataframe in descending order
+    fi_df.sort_values(by=['feature_importance'], ascending=False,inplace=True)
+
+    # Define size of bar plot
+    plt.figure(figsize=(10,8))
+    # Plot Searborn bar chart
+    sns.barplot(x=fi_df['feature_importance'], y=fi_df['feature_names'])
+    # Add chart labels
+    plt.title(f'{model_name} Feature Importance')
+    plt.xlabel('Feature Importance')
+    plt.ylabel('Feature Names')
+    plt.savefig(f'./output/{model_name}_feature_importance.png', dpi=300, bbox_inches='tight')
+    plt.show()
+
+
+def plot_roc_curve(y_test, y_pred, model_name):
+    """
+    Function to plot the ROC curve for a given model
+
+    Input:
+        y_test: actual values
+        y_pred: predicted values
+        model_name: name of the model
+    """
+
+    from sklearn.metrics import roc_curve, roc_auc_score
+
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+    auc = roc_auc_score(y_test, y_pred)
+
+    plt.figure()
+    plt.plot(fpr, tpr, color='orange', label=f'{model_name} (AUC = {auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='darkblue', linestyle='--')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(f'{model_name} ROC Curve')
+    plt.legend()
+    plt.savefig(f'output/{model_name}_roc_curve.png')
+    plt.show()
+
+def plot_classification_report(y_true, y_pred, label_names, model_name):
+    """
+    Function to plot the classification report for a given model
+
+    Input:
+        y_test: actual values
+        y_pred: predicted values
+        model_name: name of the model
+    """
+
+    from sklearn.metrics import classification_report
+
+    clf_report = classification_report(y_true, y_pred, target_names=label_names,
+                    output_dict=True)
+
+    plt.figure()
+    # .iloc[:-1, :] to exclude support
+    sns.heatmap(
+        pd.DataFrame(clf_report).iloc[:-1, :].T, 
+        annot=True,
+        cmap='viridis'
+    )
+    plt.title(f'{model_name} Classification Report')
+    plt.savefig(f'output/{model_name}_classification_report.png')
+    plt.show()
+
+def plot_confusion_heatmap(y_true, y_pred, label_names, model_name):
+    cm = confusion_matrix(y_true, y_pred)
+
+    plt.figure()
+    sns.heatmap(cm, 
+        annot=True, 
+        fmt='d', 
+        cmap='viridis',
+        xticklabels=label_names,
+        yticklabels=label_names
+    )
+    plt.title(f'{model_name} Confusion Matrix')
+    plt.xlabel('Predicted Value')
+    plt.ylabel('True Value')
+    plt.savefig(f'output/{model_name}_confusion_matrix.png')
+    plt.show()
+
+
+def print_prediction_metrics(y_test, y_pred, model_name):
+    """
+    Function to print the prediction metrics for a given model
+
+    Input:
+        y_test: actual values
+        y_pred: predicted values
+        model_name: name of the model
+
+    Returns:
+        accuracy: accuracy score
+        precision: precision score
+        recall: recall score
+        f1: f1 score
+        roc_auc: roc auc score
+    """
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    roc_auc = roc_auc_score(y_test, y_pred)
+
+    print(f'Model: {model_name}')
+    print(f'Accuracy: {accuracy:.4f}')
+    print(f'Precision: {precision:.4f}')
+    print(f'Recall: {recall:.4f}')
+    print(f'F1 Score: {f1:.4f}')
+    print(f'ROC AUC Score: {roc_auc:.4f}')
     
+    return accuracy, precision, recall, f1, roc_auc
+    
+
 def create_bins(df, col, n_bins):
     """
     Function to create bins for a given column in the dataframe
